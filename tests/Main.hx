@@ -1,6 +1,6 @@
 package;
 
-import ale.pseint.Script;
+import ale.psescript.Script;
 
 import haxe.Log;
 
@@ -11,7 +11,7 @@ class Main
 		final script:Script = new Script('test');
 
 		#if VERBOSE_TEST
-		Log.trace('\n--- ALE PSeInt Test --- \n\n' + script.content + '\n\n---\n', null);
+		Log.trace('\n--- ALE PSeScript Test --- \n\n' + script.content + '\n\n---\n', null);
 		#end
 
 		script.execute();

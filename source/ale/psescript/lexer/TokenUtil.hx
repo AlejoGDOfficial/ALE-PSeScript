@@ -1,16 +1,17 @@
-package ale.pseint.lexer;
+package ale.psescript.lexer;
 
 class TokenUtil
 {
     public static var symbolToTokenType:Map<String, TokenType> = [
         ',' => TComma,
         '(' => TLParen,
-        ')' => TRParen
+        ')' => TRParen,
+        '.' => TDot,
+        '=' => TEqual
     ];
 
     public static var identToKeyword:Map<String, TokenType> = [
-        'Escribir' => TEscribir,
-        'Algoritmo' => TAlgoritmo,
-        'FinAlgoritmo' => TFinAlgoritmo
+        'define' => TDefine,
+        'as' => TAs
     ];
 }

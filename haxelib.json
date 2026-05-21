@@ -1,11 +1,11 @@
 {
-	"name": "ale-pseint",
-	"url": "https://github.com/AlejoGDOfficial/ALE-PSeInt/",
+	"name": "ale-psescript",
+	"url": "https://github.com/AlejoGDOfficial/ALE-PSeScript/",
 	"license": "MIT",
 	"tags": [
 		"haxe",
 		"scripting",
-		"pseint"
+		"psescript"
 	],
 	"description": "",
 	"version": "0.1",

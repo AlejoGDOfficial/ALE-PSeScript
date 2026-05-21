@@ -1,4 +1,4 @@
-# ALE PSeInt
+# ALE PSeScript
 
 A modified PSeInt designed to be used as a scripting language in Haxe projects
 

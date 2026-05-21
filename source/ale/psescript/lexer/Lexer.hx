@@ -1,4 +1,4 @@
-package ale.pseint.lexer;
+package ale.psescript.lexer;
 
 using StringTools;
 
@@ -30,7 +30,7 @@ class Lexer
         return char >= '0'.code && char <= '9'.code;
 
     inline function isDigit(char:Int):Bool
-        return isDigitStart(char) || char == '.'.code;
+        return isDigitStart(char);
 
     inline function isIdentStart(char:Int):Bool
         return (char >= 'a'.code && char <= 'z'.code) || (char >= 'A'.code && char <= 'Z'.code) || char == '_'.code;
@@ -68,11 +68,8 @@ class Lexer
                 final asKeyword:TokenType = TokenUtil.identToKeyword[res];
 
                 final token:Token = {
-                    type: asKeyword ?? TIdent
+                    type: asKeyword ?? TIdent(res)
                 };
-
-                if (asKeyword == null)
-                    token.value = res;
 
                 result.push(token);
 
@@ -87,8 +84,7 @@ class Lexer
                     res += advanceString();
 
                 result.push({
-                    type: TNumber,
-                    value: Std.parseFloat(res)
+                    type: TNumber(Std.parseFloat(res))
                 });
 
                 continue;
@@ -110,24 +106,16 @@ class Lexer
                     advance();
 
                     result.push({
-                        type: TString,
-                        value: res
-                    });
-                
-                case '<'.code:
-                    advance();
-
-                    result.push({
-                        type: match('-'.code) ? TLeftArrow : TLess
+                        type: TString(res)
                     });
                 
                 default:
-                    advance();
-
                     if (TokenUtil.symbolToTokenType.exists(peekString()))
                         result.push({
                             type: TokenUtil.symbolToTokenType[peekString()]
                         });
+                        
+                    advance();
             }
         }
 

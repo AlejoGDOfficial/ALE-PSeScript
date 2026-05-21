@@ -1,4 +1,4 @@
-package ale.pseint;
+package ale.psescript;
 
 class Config
 {

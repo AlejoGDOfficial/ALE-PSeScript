@@ -1,4 +1,4 @@
-package ale.pseint;
+package ale.psescript;
 
 #if sys
 import sys.FileSystem;
@@ -32,10 +32,10 @@ class Defaults
     public static final TYPEDEFS:Map<String, Class<Dynamic>> = [];
     public static final VARIABLES:Map<String, Dynamic> = [];
 
-    public static final SCRIPT_EXTENSION:String = '.psc';
+    public static final SCRIPT_EXTENSION:String = '.pss';
     public static final SCRIPT_PATH:String = 'scripts/';
 
-    public static final INTERP_NAME:String = 'ALEPSeInt.psc';
+    public static final INTERP_NAME:String = 'PSeScript.pss';
 
     public static final ERROR_HANDLER:String -> Void = (e) -> Log.trace('[ ERROR ] ' + e, null);
 }
