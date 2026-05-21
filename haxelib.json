@@ -1,0 +1,17 @@
+{
+	"name": "ale-pseint",
+	"url": "https://github.com/AlejoGDOfficial/ALE-PSeInt/",
+	"license": "MIT",
+	"tags": [
+		"haxe",
+		"scripting",
+		"pseint"
+	],
+	"description": "",
+	"version": "0.1",
+	"releasenote": "",
+	"contributors": [
+		"AlejoGDOfficial"
+	],
+	"classPath": "source"
+}
