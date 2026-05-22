@@ -1,6 +1,5 @@
 package ale.psescript.interp;
 
-import ale.psescript.compiler.Chunk;
 import ale.psescript.compiler.Inst;
 
 import haxe.Log;
@@ -22,49 +21,39 @@ class Interp
         });
     }
 
-    var stack:Array<Dynamic>;
+    var stack:Array<Dynamic> = [];
 
-    var chunk:Chunk;
+    inline function push(val:Dynamic)
+        stack.push(val);
 
-    var pointer:Int = 0;
+    inline function pop():Dynamic
+        return stack.pop();
 
-    inline function readByte():Int
-        return chunk.bytes[pointer++];
-
-    inline function readConstant():Dynamic
-        return chunk.constants[readByte()];
-
-    public function execute(newChunk:Chunk):Dynamic
+    public function execute(instructions:Array<Inst>):Dynamic
     {
-        stack = [];
-
-        chunk = newChunk;
-
-        pointer = 0;
-
-        while (pointer < chunk.bytes.length)
+        for (inst in instructions)
         {
-            switch (readByte() : Inst)
+            switch (inst)
             {
-                case CONSTANT:
-                    stack.push(readConstant());
+                case IPush(val):
+                    push(val);
 
-                case CALL:
-                    final args:Array<Dynamic> = [];
+                case IDefine(name):
+                    scope.define(name, pop());
 
-                    for (i in 0...readConstant())
-                        args.unshift(stack.pop());
+                case IVariable(name):
+                    push(scope.get(name));
+
+                case IField(field):
+                    push(Reflect.getProperty(pop(), field));
+
+                case ICall(argsNum):
+                    final args = [];
+
+                    for (i in 0...argsNum)
+                        args.unshift(pop());
 
                     Reflect.callMethod(null, stack.pop(), args);
-
-                case VARIABLE:
-                    stack.push(scope.get(readConstant()));
-
-                case FIELD:
-                    stack.push(Reflect.getProperty(stack.pop(), readConstant()));
-
-                case DEFINE:
-                    scope.define(readConstant(), stack.pop());
 
                 default:
             }

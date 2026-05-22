@@ -4,79 +4,56 @@ import ale.psescript.parser.Expr;
 
 class Compiler
 {
-    public final ast:Expr;
+    final ast:Array<Expr>;
 
-    public final chunk:Chunk = new Chunk();
-
-    public function new(ast:Expr)
+    public function new(ast:Array<Expr>)
         this.ast = ast;
 
-    public function compile():Chunk
-    {
-        compileExpr(ast);
+    final result:Array<Inst> = [];
 
-        return chunk;
+    public function compile():Array<Inst>
+    {
+        for (expr in ast)
+            compileExpr(expr);
+
+        return result;
     }
 
-    function emitByte(op:Inst)
-        chunk.bytes.push(op);
-
-    function emitConstant(value:Dynamic)
-        emitByte(addConstant(value));
-
-    function addConstant(value:Dynamic):Int
-    {
-        chunk.constants.push(value);
-
-        return chunk.constants.length - 1;
-    }
+    function emit(inst:Inst)
+        result.push(inst);
 
     function compileExpr(expr:Expr)
     {
         switch (expr.type)
         {
-            case EProgram(exprs):
-                for (e in exprs)
-                    compileExpr(e);
-
-            case EVariable(name):
-                emitByte(VARIABLE);
-
-                emitConstant(name);
-
-            case EField(obj, name):
-                compileExpr(obj);
-
-                emitByte(FIELD);
-
-                emitConstant(name);
-
             case EString(value):
-                emitByte(CONSTANT);
-
-                emitConstant(value);
+                emit(IPush(value));
 
             case ENumber(value):
-                emitByte(CONSTANT);
-
-                emitConstant(value);
-
-            case ECall(obj, args):
-                compileExpr(obj);
-
-                for (arg in args)
-                    compileExpr(arg);
-
-                emitByte(CALL);
-
-                emitConstant(args.length);
+                emit(IPush(value));
 
             case EDefine(name, value):
                 compileExpr(value);
 
-                emitByte(DEFINE);
+                emit(IDefine(name));
 
-                emitConstant(name);
+            case EVariable(name):
+                emit(IVariable(name));
+
+            case EField(obj, name):
+                compileExpr(obj);
+
+                emit(IField(name));
+
+            case ECall(obj, args):
+                compileExpr(obj);
+
+                args ??= [];
+
+                for (arg in args)
+                    compileExpr(arg);
+
+                emit(ICall(args.length));
 
             default:
         }

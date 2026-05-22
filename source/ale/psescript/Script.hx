@@ -34,31 +34,36 @@ class Script
     {
         var result = null;
 
+
         var time:Float = Timer.stamp();
         
         final tokens = new Lexer(content).tokenize();
 
         lexerTime = (Timer.stamp() - time) * 1000;
 
+
         time = Timer.stamp();
 
-        final expr = new Parser(tokens).parse();
+        final ast = new Parser(tokens).parse();
 
         parserTime = (Timer.stamp() - time) * 1000;
 
+
         time = Timer.stamp();
 
-        final chunk = new Compiler(expr).compile();
+        final instructions = new Compiler(ast).compile();
 
         compilerTime = (Timer.stamp() - time) * 1000;
+
         
         time = Timer.stamp();
-
-        result = interp.execute(chunk);
+        
+        result = interp.execute(instructions);
 
         interpTime = (Timer.stamp() - time) * 1000;
 
-        return null;
+
+        return result;
     }
 
     public function safeExecute():Dynamic

@@ -40,7 +40,7 @@ class Parser
         if (advance() != tok)
             throw 'Expected ' + tok + ', got ' + peekLast();
 
-    public function parse():Expr
+    public function parse():Array<Expr>
     {
         final result:Array<Expr> = [];
 
@@ -52,7 +52,7 @@ class Parser
                 result.push(res);
         }
 
-        return {type: EProgram(result)};
+        return result;
     }
 
     function parseExpr(prec:Precedence = NONE):Expr

@@ -1,17 +1,13 @@
 package ale.psescript.compiler;
 
-enum abstract Inst(Int) from Int to Int
+enum Inst
 {
-    var CONSTANT = 0;
-    
-    var VARIABLE = 1;
-    var FIELD = 2;
+    IPush(value:Dynamic);
 
-    var DEFINE = 3;
+    IDefine(name:String);
 
-    var CALL = 4;
+    IVariable(name:String);
+    IField(field:String);
 
-    var POP = 5;
-
-    var RETURN = 6;
+    ICall(args:Int);
 }
