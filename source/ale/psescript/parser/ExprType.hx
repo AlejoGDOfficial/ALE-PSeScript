@@ -9,6 +9,7 @@ enum ExprType
 
     EDefine(name:String, ?value:Expr);
 
-    EField(obj:Null<Expr>, field:String);
+    EVariable(name:String);
+    EField(obj:Expr, field:String);
     ECall(obj:Expr, ?args:Array<Expr>);
 }

@@ -92,7 +92,7 @@ class Parser
                 {type: EDefine(name, parseOptionalValue())}
 
             case TIdent(id):
-                {type: EField(null, id)}
+                {type: EVariable(id)}
 
             default:
                 null;

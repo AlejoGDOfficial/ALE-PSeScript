@@ -2,6 +2,7 @@ package ale.psescript;
 
 import ale.psescript.lexer.*;
 import ale.psescript.parser.*;
+import ale.psescript.compiler.*;
 import ale.psescript.interp.*;
 
 import haxe.Exception;
@@ -26,6 +27,7 @@ class Script
 
     public var lexerTime:Float = 0;
     public var parserTime:Float = 0;
+    public var compilerTime:Float = 0;
     public var interpTime:Float = 0;
 
     public function execute():Dynamic
@@ -45,8 +47,14 @@ class Script
         parserTime = (Timer.stamp() - time) * 1000;
 
         time = Timer.stamp();
+
+        final chunk = new Compiler(expr).compile();
+
+        compilerTime = (Timer.stamp() - time) * 1000;
         
-        result = interp.execute(expr);
+        time = Timer.stamp();
+
+        result = interp.execute(chunk);
 
         interpTime = (Timer.stamp() - time) * 1000;
 

@@ -1,7 +1,7 @@
 package ale.psescript.interp;
 
-import ale.psescript.parser.Expr;
-import ale.psescript.parser.ExprType;
+import ale.psescript.compiler.Chunk;
+import ale.psescript.compiler.Inst;
 
 import haxe.Log;
 
@@ -22,43 +22,54 @@ class Interp
         });
     }
 
-    public function execute(expr:Expr):Dynamic
+    var stack:Array<Dynamic>;
+
+    var chunk:Chunk;
+
+    var pointer:Int = 0;
+
+    inline function readByte():Int
+        return chunk.bytes[pointer++];
+
+    inline function readConstant():Dynamic
+        return chunk.constants[readByte()];
+
+    public function execute(newChunk:Chunk):Dynamic
     {
-        return switch (expr.type)
+        stack = [];
+
+        chunk = newChunk;
+
+        pointer = 0;
+
+        while (pointer < chunk.bytes.length)
         {
-            case EProgram(exprs):
-                var result = null;
+            switch (readByte() : Inst)
+            {
+                case CONSTANT:
+                    stack.push(readConstant());
 
-                try
-                {
-                    for (stmt in exprs)
-                        result = execute(stmt);
-                } catch (signal:ReturnSignal) {
-                    result = signal.value;
-                }
+                case CALL:
+                    final args:Array<Dynamic> = [];
 
-                result;
+                    for (i in 0...readConstant())
+                        args.unshift(stack.pop());
 
-            case EField(obj, field):
-                if (obj == null)
-                    scope.get(field);
-                else
-                    Reflect.getProperty(execute(obj), field);
+                    Reflect.callMethod(null, stack.pop(), args);
 
-            case ECall(obj, args):
-                Reflect.callMethod(null, execute(obj), [for (arg in args) execute(arg)]);
+                case VARIABLE:
+                    stack.push(scope.get(readConstant()));
 
-            case EDefine(name, value):
-                scope.define(name, execute(value));
+                case FIELD:
+                    stack.push(Reflect.getProperty(stack.pop(), readConstant()));
 
-            case ENumber(val):
-                val;
+                case DEFINE:
+                    scope.define(readConstant(), stack.pop());
 
-            case EString(val):
-                val;
-
-            default:
-                null;
+                default:
+            }
         }
+
+        return null;
     }
 }
