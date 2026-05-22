@@ -35,7 +35,7 @@ class Defaults
     public static final SCRIPT_EXTENSION:String = '.pss';
     public static final SCRIPT_PATH:String = 'scripts/';
 
-    public static final INTERP_NAME:String = 'PSeScript.pss';
+    public static final INTERP_NAME:String = 'PSeScript' + SCRIPT_EXTENSION;
 
     public static final ERROR_HANDLER:String -> Void = (e) -> Log.trace('[ ERROR ] ' + e, null);
 }
