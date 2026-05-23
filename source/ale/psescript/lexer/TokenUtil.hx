@@ -12,6 +12,9 @@ class TokenUtil
 
     public static var identToKeyword:Map<String, TokenType> = [
         'define' => TDefine,
-        'as' => TAs
+        'as' => TAs,
+        'function' => TFunction,
+        'end' => TEnd,
+        'null' => TNull
     ];
 }

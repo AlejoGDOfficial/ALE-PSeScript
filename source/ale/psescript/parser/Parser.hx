@@ -70,10 +70,13 @@ class Parser
         return switch (advance())
         {
             case TString(val):
-                {type: EString(val)};
+                {type: EString(val)}
 
             case TNumber(val):
-                {type: ENumber(val)};
+                {type: ENumber(val)}
+
+            case TNull:
+                {type: ENull}
 
             case TDefine:
                 final name:String = switch (advance())
@@ -93,6 +96,22 @@ class Parser
 
             case TIdent(id):
                 {type: EVariable(id)}
+
+            case TFunction:
+                final name:String = switch (advance())
+                {
+                    case TIdent(n):
+                        n;
+
+                    default:
+                        error();
+
+                        null;
+                }
+
+                final args:Array<FunctionArgument> = parseFunctionArguments(); 
+
+                {type: EFunction(name, args, parseFunctionBlock())};
 
             default:
                 null;
@@ -129,25 +148,101 @@ class Parser
         }
     }
 
+    function parseFunctionBlock():Array<Expr>
+    {
+        final result:Array<Expr> = [];
+        
+        while (!isEnd() && peek() != TEnd)
+        {
+            final expr = parseExpr();
+
+            if (expr != null)
+                result.push(expr);
+        }
+        
+        expect(TEnd);
+        
+        return result;
+    }
+
     function parseCallArguments():Array<Expr>
     {
         final args:Array<Expr> = [];
 
         expect(TLParen);
 
-        while (!isEnd())
+        var shouldContinue:Bool = peek() != TRParen;
+
+        while (shouldContinue && !isEnd())
         {
             args.push(parseExpr());
 
-            if (peek() == TComma)
-                advance();
-            else
-                break;
+            shouldContinue = switch (peek())
+            {
+                case TComma:
+                    advance();
+
+                    true;
+
+                default:
+                    false;
+            }
         }
 
         expect(TRParen);
 
         return args;
+    }
+
+    function parseFunctionArguments():Array<FunctionArgument>
+    {
+        final result:Array<FunctionArgument> = [];
+
+        expect(TLParen);
+
+        var shouldContinue:Bool = peek() != TRParen;
+
+        while (shouldContinue)
+        {
+            final name:String = switch (advance())
+            {
+                case TIdent(n):
+                    n;
+
+                default:
+                    error();
+
+                    null;
+            }
+
+            final value:Expr = switch (peek())
+            {
+                case TEqual:
+                    advance();
+
+                    parseExpr();
+                
+                default:
+                    null;
+            }
+
+            result.push({name: name, value: value});
+
+            shouldContinue = switch (peek())
+            {
+                case TComma:
+                    advance();
+
+                    true;
+
+                default:
+                    false;
+            }
+        }
+
+        expect(TRParen);
+
+        return result;
     }
 
     function parseOptionalType()

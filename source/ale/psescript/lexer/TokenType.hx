@@ -8,6 +8,8 @@ enum TokenType
     TString(value:String);
     TNumber(value:Float);
 
+    TNull;
+
     // Symbols
 
     TComma;
@@ -23,6 +25,8 @@ enum TokenType
 
     TDefine;
     TAs;
+    TFunction;
+    TEnd;
 
     // Operators
 }

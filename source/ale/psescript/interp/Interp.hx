@@ -32,33 +32,73 @@ class Interp
     public function execute(instructions:Array<Inst>):Dynamic
     {
         for (inst in instructions)
-        {
-            switch (inst)
-            {
-                case IPush(val):
-                    push(val);
-
-                case IDefine(name):
-                    scope.define(name, pop());
-
-                case IVariable(name):
-                    push(scope.get(name));
-
-                case IField(field):
-                    push(Reflect.getProperty(pop(), field));
-
-                case ICall(argsNum):
-                    final args = [];
-
-                    for (i in 0...argsNum)
-                        args.unshift(pop());
-
-                    Reflect.callMethod(null, stack.pop(), args);
-
-                default:
-            }
-        }
+            executeInst(inst);
 
         return null;
+    }
+
+    function executeInst(inst:Inst)
+    {
+        switch (inst)
+        {
+            case IPush(val):
+                push(val);
+
+            case IDefine(name):
+                scope.define(name, pop());
+
+            case IVariable(name):
+                push(scope.get(name));
+
+            case IField(field):
+                push(Reflect.getProperty(pop(), field));
+
+            case ICall(argsNum):
+                final args = [];
+
+                for (_ in 0...argsNum)
+                    args.unshift(pop());
+
+                callFunction(pop(), args);
+
+            case IFunction(name, args, block):
+                final defaults:Array<Dynamic> = [];
+
+                for (_ in 0...args.length)
+                    defaults.unshift(pop());
+
+                scope.define(name, new Function(args, defaults, block, scope));
+
+            default:
+        }
+    }
+
+    function callFunction(toCall:Dynamic, ?args:Array<Dynamic>)
+    {
+        args ??= [];
+
+        if (toCall is Function)
+        {
+            final newScope:Scope = new Scope(toCall.scope);
+
+            for (i in 0...toCall.arguments.length)
+                newScope.define(toCall.arguments[i], args[i] ?? toCall.defaults[i]);
+
+            executeBlock(toCall.block, newScope);
+        } else {
+            Reflect.callMethod(null, toCall, args);
+        }
+    }
+
+    function executeBlock(insts:Array<Inst>, ?newScope:Scope)
+    {
+        final prev:Scope = scope;
+
+        scope = newScope ?? new Scope(scope);
+
+        for (inst in insts)
+            executeInst(inst);
+
+        scope = prev;
     }
 }

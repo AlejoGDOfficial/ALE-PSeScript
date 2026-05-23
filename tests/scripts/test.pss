@@ -1,3 +1,5 @@
-define test as String = 'oso'
+function osoFunc(oso = 'oso', donde = 'tu')
+    trace(oso)
+end
 
-trace(test.length)
+osoFunc()
