@@ -12,7 +12,9 @@ enum ExprType
 
     EVariable(name:String);
     EField(obj:Expr, field:String);
-    EFunction(name:String, args:Array<FunctionArgument>, block:Array<Expr>);
+    EFunction(name:String, args:Array<FunctionArgument>, block:Expr);
 
     ECall(obj:Expr, ?args:Array<Expr>);
+
+    EProgram(exprs:Array<Expr>);
 }

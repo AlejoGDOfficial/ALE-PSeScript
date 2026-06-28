@@ -1,5 +1,7 @@
-function osoFunc(oso = 'oso', donde = 'tu')
+function osoFunc(oso = 'sahur', donde = 'tu')
     trace(oso)
 end
 
 osoFunc()
+
+trace(19)

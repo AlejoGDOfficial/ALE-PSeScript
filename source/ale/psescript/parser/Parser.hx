@@ -40,7 +40,7 @@ class Parser
         if (advance() != tok)
             throw 'Expected ' + tok + ', got ' + peekLast();
 
-    public function parse():Array<Expr>
+    public function parse():Expr
     {
         final result:Array<Expr> = [];
 
@@ -52,7 +52,7 @@ class Parser
                 result.push(res);
         }
 
-        return result;
+        return {type: EProgram(result)};
     }
 
     function parseExpr(prec:Precedence = NONE):Expr
@@ -148,7 +148,7 @@ class Parser
         }
     }
 
-    function parseFunctionBlock():Array<Expr>
+    function parseFunctionBlock():Expr
     {
         final result:Array<Expr> = [];
         
@@ -162,7 +162,7 @@ class Parser
         
         expect(TEnd);
         
-        return result;
+        return {type: EBlock(result)};
     }
 
     function parseCallArguments():Array<Expr>

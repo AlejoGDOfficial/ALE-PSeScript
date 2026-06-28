@@ -1,6 +1,6 @@
 package ale.psescript.interp;
 
-import ale.psescript.compiler.Inst;
+import ale.psescript.parser.Expr;
 
 import haxe.Log;
 
@@ -21,84 +21,61 @@ class Interp
         });
     }
 
-    var stack:Array<Dynamic> = [];
-
-    inline function push(val:Dynamic)
-        stack.push(val);
-
-    inline function pop():Dynamic
-        return stack.pop();
-
-    public function execute(instructions:Array<Inst>):Dynamic
+    public function execute(ast:Expr, ?customScope:Scope):Dynamic
     {
-        for (inst in instructions)
-            executeInst(inst);
-
-        return null;
-    }
-
-    function executeInst(inst:Inst)
-    {
-        switch (inst)
+        return switch (ast.type)
         {
-            case IPush(val):
-                push(val);
+            case EBlock(exprs):
+                final oldScope = scope;
 
-            case IDefine(name):
-                scope.define(name, pop());
+                scope = customScope ?? new Scope(scope);
 
-            case IVariable(name):
-                push(scope.get(name));
+                for (expr in exprs)
+                    execute(expr);
 
-            case IField(field):
-                push(Reflect.getProperty(pop(), field));
+                scope = oldScope;
 
-            case ICall(argsNum):
-                final args = [];
+                null;
 
-                for (_ in 0...argsNum)
-                    args.unshift(pop());
+            case EFunction(name, args, block):
+                scope.define(name, Reflect.makeVarArgs(
+                    function (newArgs:Array<Dynamic>)
+                    {
+                        final oldScope = scope;
 
-                callFunction(pop(), args);
+                        scope = new Scope(scope);
 
-            case IFunction(name, args, block):
-                final defaults:Array<Dynamic> = [];
+                        for (index => arg in args)
+                            scope.define(arg.name, execute(newArgs[index] ?? arg.value));
 
-                for (_ in 0...args.length)
-                    defaults.unshift(pop());
+                        execute(block, scope);
 
-                scope.define(name, new Function(args, defaults, block, scope));
+                        scope = oldScope;
+                    }
+                ));
+
+                null;
+
+            case EProgram(exprs):
+                for (expr in exprs)
+                    execute(expr);
+
+                null;
+
+            case ECall(obj, args):
+                Reflect.callMethod(this, execute(obj), [for (arg in args) execute(arg)]);
+
+            case EVariable(name):
+                scope.get(name);
+
+            case EString(str):
+                str;
+
+            case ENumber(num):
+                num;
 
             default:
+                null;
         }
-    }
-
-    function callFunction(toCall:Dynamic, ?args:Array<Dynamic>)
-    {
-        args ??= [];
-
-        if (toCall is Function)
-        {
-            final newScope:Scope = new Scope(toCall.scope);
-
-            for (i in 0...toCall.arguments.length)
-                newScope.define(toCall.arguments[i], args[i] ?? toCall.defaults[i]);
-
-            executeBlock(toCall.block, newScope);
-        } else {
-            Reflect.callMethod(null, toCall, args);
-        }
-    }
-
-    function executeBlock(insts:Array<Inst>, ?newScope:Scope)
-    {
-        final prev:Scope = scope;
-
-        scope = newScope ?? new Scope(scope);
-
-        for (inst in insts)
-            executeInst(inst);
-
-        scope = prev;
     }
 }
